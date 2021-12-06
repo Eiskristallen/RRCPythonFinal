@@ -1,6 +1,4 @@
 import sqlite3
-# from scrape_weather import WeatherScraper
-# myparser = WeatherScraper()
 
 
 class DBOperations:
@@ -33,7 +31,7 @@ class DBOperations:
             else:
                 print(e.args)
 
-    def save_data(self, data):
+    def save_data(self, data, db_conn, db_cursor):
         """save temp data into database if it's not exsit
 
         Args:
@@ -49,35 +47,27 @@ class DBOperations:
             sql = """insert into samples (sample_date,max_temp,min_temp,avg_temp,location)
              values (?,?,?,?,?)"""
             for item in temp_data:
-                self.db_cursor.execute(sql, item)
-            self.blank_db.commit()
+                db_cursor.execute(sql, item)
+            db_conn.commit()
             print("Added data successfully.")
-            self.blank_db.close()
+            db_conn.close()
         except Exception as e:
             print("Error inserting sample. Duplicate data detected")
-            self.blank_db.close()
+            db_conn.close()
 
-    def purge_data(self):
+    def purge_data(self, db_conn, db_cursor):
         try:
-            self.db_cursor.execute("DELETE FROM samples")
-            self.blank_db.commit()
-            self.blank_db.close()
+            db_cursor.execute("DELETE FROM samples")
+            db_conn.commit()
+            db_conn.close()
             print('delete data successfully')
         except Exception as e:
             print('An exception occurred', e)
 
-    def fetch_data(self, start_date, end_date):
+    def fetch_data(self, start_date, end_date, db_cursor):
         try:
             sql = """select * from samples where date(sample_date) between '%s' and '%s'""" % (
                 start_date, end_date)
-            print(sql)
-            return self.db_cursor.execute(sql)
+            return db_cursor.execute(sql)
         except Exception as e:
             print('An exception occurred', e)
-
-
-myDbo = DBOperations()
-myDbo.initialize_db()
-print(myDbo.fetch_data("2000-11-02", "2001-10-01"))
-# print(myDbo.save_data(myparser.parse_data()))
-# myDbo.purge_data()
