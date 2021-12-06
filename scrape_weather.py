@@ -56,7 +56,11 @@ class WeatherScraper(HTMLParser):
         if bool(tag == 'tr'):
             self.isTr = True
             if self.terminate_loop == False:
-                self.weather[str(self.year_month)+'-'+str(self.days)] = {}
+                if self.days < 10:
+                    self.weather[str(self.year_month)+'-' +
+                                 '0'+str(self.days)] = {}
+                else:
+                    self.weather[str(self.year_month)+'-'+str(self.days)] = {}
         if bool(tag == 'td') & bool(self.td_count <= 2):
             self.isTd = True
             self.td_count = self.td_count + 1
@@ -96,17 +100,29 @@ class WeatherScraper(HTMLParser):
         if self.isTr & self.isTd & bool('LegendE' not in data) & bool('LegendM' not in data) & (self.terminate_loop == False):
             data = data.replace(r'\n', '').replace(
                 r'\r', '').replace(r'\t', '')
-            if self.td_count == 1:
-                self.weather[str(self.year_month)+'-' +
-                             str(self.days)]['Max'] = float(data)
-            if self.td_count == 2:
-                self.weather[str(self.year_month)+'-' +
-                             str(self.days)]['Min'] = float(data)
-            if self.td_count == 3:
-                self.weather[str(self.year_month)+'-' +
-                             str(self.days)]['Mean'] = float(data)
-                self.days = self.days + 1
+            if self.days < 10:
+                if self.td_count == 1:
+                    self.weather[str(self.year_month)+'-' + '0' +
+                                 str(self.days)]['Max'] = float(data)
+                if self.td_count == 2:
+                    self.weather[str(self.year_month)+'-'+'0' +
+                                 str(self.days)]['Min'] = float(data)
+                if self.td_count == 3:
+                    self.weather[str(self.year_month)+'-'+'0' +
+                                 str(self.days)]['Mean'] = float(data)
+                    self.days = self.days + 1
+            else:
+                if self.td_count == 1:
+                    self.weather[str(self.year_month)+'-' +
+                                 str(self.days)]['Max'] = float(data)
+                if self.td_count == 2:
+                    self.weather[str(self.year_month)+'-' +
+                                 str(self.days)]['Min'] = float(data)
+                if self.td_count == 3:
+                    self.weather[str(self.year_month)+'-' +
+                                 str(self.days)]['Mean'] = float(data)
+                    self.days = self.days + 1
 
 
 myparser = WeatherScraper()
-print(myparser.parse_data())
+myparser.parse_data()
